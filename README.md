@@ -174,3 +174,32 @@ conn cloud-to-onprem
     rightsubnet=172.16.1.0/24
     authby=secret
     auto=start
+
+    Verification Commands
+Cisco Router (Packet Tracer)
+show crypto isakmp sa        ← Phase 1 status (QM_IDLE = active)
+show crypto ipsec sa         ← Phase 2 SA + packet counters
+show ip route                ← Routing table
+show running-config          ← Full configuration
+Docker / strongSwan
+powershell
+docker exec cloud-gateway ipsec status
+docker exec cloud-gateway ipsec statusall
+docker exec cloud-server ping -c 4 10.0.0.1
+docker compose ps
+docker logs cloud-gateway
+Troubleshooting
+Problem	Cause	Fix
+Invalid input detected in Packet Tracer	Wrong CLI mode	Type enable then configure terminal first
+Tunnel shows MM_NO_STATE	PSK mismatch or peer unreachable	Verify pre-shared key matches on both sides
+QM_IDLE but ping fails	ACL not matching traffic	Check permit ip subnet ranges in CRYPTO-ACL
+Docker container restarting	Missing kernel modules or bad image	Use Ubuntu-based strongSwan image, not community images
+LocalStack license error	Pulled Pro version	Pin to localstack/localstack:3.0 (community free)
+WSL2 file mount error	Windows path issue	Use Dockerfile COPY instead of volume mounts
+Simulated AWS Services (LocalStack)
+Service	Status	Use Case
+S3	Available	File storage simulation
+Lambda	Available	Serverless function simulation
+SQS	Available	Message queue simulation
+SNS	Available	Notification service simulation
+DynamoDB	Available	NoSQL database simulation
