@@ -203,3 +203,26 @@ Lambda	Available	Serverless function simulation
 SQS	Available	Message queue simulation
 SNS	Available	Notification service simulation
 DynamoDB	Available	NoSQL database simulation
+
+Technologies Used
+Cisco IOS 15.4 — Router configuration, IPsec/IKEv1
+Cisco Packet Tracer — On-premise network simulation
+strongSwan 5.9.5 — Linux IPsec implementation (cloud gateway)
+Docker & Docker Compose — Container orchestration
+Ubuntu 22.04 — Base OS for strongSwan container
+LocalStack 3.0 — AWS cloud services simulation
+Alpine Linux — Lightweight cloud server container
+Windows 11 + WSL2 — Host environment
+
+Project Outcome
+Successfully designed and deployed a hybrid cloud network demonstrating:
+Secure IPsec Site-to-Site VPN tunnel between on-premise and cloud environments
+Bidirectional connectivity verified with successful pings across both network segments
+Cloud-side AWS service simulation via LocalStack with S3, Lambda, and DynamoDB available
+Industry-standard encryption (AES-256) and authentication (PSK/SHA) applied throughout
+Multi-container cloud infrastructure deployed and managed via Docker Compose
+Author ZAINAB IMRAN
+
+HybridCloud Corp — Network Infrastructure Lab Submitted as part of Network Engineering coursework.
+
+This project uses Cisco Packet Tracer as an approved substitute for GNS3 due to IOS image availability constraints in the lab environment. EOF
