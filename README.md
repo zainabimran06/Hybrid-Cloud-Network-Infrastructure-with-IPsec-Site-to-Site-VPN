@@ -72,3 +72,105 @@ HybridCloud/
 │   └── docker-compose-ps.png          ← All containers running
 │
 └── README.md                          ← This file
+
+Setup Instructions
+Prerequisites
+Cisco Packet Tracer (v8.x or later)
+Docker Desktop for Windows (with WSL2 backend)
+Windows 10/11 with WSL2 enabled
+Part 1 — On-Premise Side (Packet Tracer)
+
+1. Open the topology
+
+File → Open → HybridCloud_Final.pkt
+
+2. Verify device IPs
+
+PC0: 172.16.1.10/24, gateway 172.16.1.1
+R1OnPrem Gi0/0: 172.16.1.1/24
+R1OnPrem Gi0/1: 203.0.113.1/252
+Cloud-GW Gi0/1: 203.0.113.2/252
+PC1: 10.0.0.10/24, gateway 10.0.0.1
+
+3. Verify IPsec tunnel status on R1OnPrem
+
+enable
+show crypto isakmp sa
+
+Expected output:
+
+dst           src           state     conn-id  status
+203.0.113.2   203.0.113.1   QM_IDLE   XXXX     ACTIVE
+
+4. Test connectivity On PC1 (cloud side) → Command Prompt:
+
+ping 172.16.1.10
+Part 2 — Cloud Side (Docker)
+
+1. Navigate to the docker folder
+
+powershell
+cd C:\HybridLab2\hybridcloud-v2-ubuntu
+
+2. Build and start all containers
+
+powershell
+docker compose up -d --build
+
+3. Verify all containers are running
+
+powershell
+docker compose ps
+
+Expected:
+
+cloud-gateway    Up
+cloud-server     Up
+localstack       Up (healthy)
+
+4. Verify strongSwan is running
+
+powershell
+docker exec cloud-gateway ipsec --version
+docker exec cloud-gateway ipsec statusall
+
+5. Test internal cloud connectivity
+
+powershell
+docker exec cloud-server ping -c 4 10.0.0.1
+
+6. Verify LocalStack (AWS simulation)
+
+powershell
+curl http://localhost:4566/_localstack/health
+
+Expected: "s3": "available", "lambda": "available", ...
+
+Key Configuration Files
+Cisco R1 — IPsec Summary
+crypto isakmp policy 10
+ encr aes 256
+ hash sha
+ authentication pre-share
+ group 5
+
+crypto isakmp key HybridCloud@123 address 203.0.113.2
+
+crypto ipsec transform-set HYBRID esp-aes esp-sha-hmac
+
+ip access-list extended CRYPTO-ACL
+ permit ip 172.16.1.0 0.0.0.255 10.0.0.0 0.0.0.255
+
+crypto map HYBRID-MAP 10 ipsec-isakmp
+ set peer 203.0.113.2
+ set transform-set HYBRID
+ match address CRYPTO-ACL
+strongSwan — ipsec.conf Summary
+conn cloud-to-onprem
+    keyexchange=ikev1
+    left=10.0.0.1
+    leftsubnet=10.0.0.0/24
+    right=203.0.113.1
+    rightsubnet=172.16.1.0/24
+    authby=secret
+    auto=start
